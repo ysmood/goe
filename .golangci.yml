@@ -8,6 +8,8 @@ linters:
     - forbidigo
     - gochecknoinits
     - paralleltest
+    - gochecknoglobals
+    - varnamelen
 
     - structcheck
     - interfacer
