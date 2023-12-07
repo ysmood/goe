@@ -11,6 +11,8 @@ linters:
     - paralleltest
     - gochecknoglobals
     - varnamelen
+    - forcetypeassert
+    - ireturn
 
     - structcheck
     - interfacer
@@ -23,8 +25,12 @@ linters:
     - nosnakecase
     - scopelint
 
-gocyclo:
-  min-complexity: 15
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+
+  cyclop:
+    max-complexity: 20
 
 issues:
   exclude-use-default: false

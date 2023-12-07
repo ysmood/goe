@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
-	"os"
 
-	_ "github.com/ysmood/dotenv"
+	dotenv "github.com/ysmood/dotenv"
 )
 
 func main() {
-	// It will output the VALUE in "../.env" which is "ok"
-	fmt.Println(os.Getenv("VALUE"))
+	num := dotenv.Get("NUM", 0)
+	str := dotenv.Get("STR", "")
+
+	// It will output the env variables in "../.env"
+	// The output will be:
+	//	2 hello world
+	fmt.Println(num+1, str+" world")
 }

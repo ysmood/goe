@@ -23,3 +23,8 @@ func init() {
 
 	lg.Println(msg)
 }
+
+// Get is a shortcut for [lib.Get].
+func Get[T lib.EnvType](name string, defaultVal T) T {
+	return lib.Get(name, defaultVal)
+}
