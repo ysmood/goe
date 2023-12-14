@@ -27,4 +27,10 @@ func TestGet(t *testing.T) {
 	g.Eq(lib.Get("FLOAT_DEFAULT", 1.1), 1.1)
 	g.Eq(lib.Get("DURATION", time.Second), time.Minute)
 	g.Eq(lib.Get("DURATION_DEFAULT", time.Hour), time.Hour)
+
+	g.Eq(lib.Require[int]("NUM"), 2)
+
+	g.Eq(g.Panic(func() {
+		lib.Require[int]("KEY")
+	}), "required env variable not found: KEY")
 }

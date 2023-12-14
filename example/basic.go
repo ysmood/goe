@@ -7,8 +7,11 @@ import (
 )
 
 func main() {
+	// Get a optional env variable
 	num := dotenv.Get("NUM", 0)
-	str := dotenv.Get("STR", "")
+
+	// Get a required env variable
+	str := dotenv.Require[string]("STR")
 
 	// It will output the env variables in "../.env"
 	// The output will be:

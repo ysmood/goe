@@ -54,12 +54,21 @@ type EnvType interface {
 
 // Get env var with default value.
 func Get[T EnvType](name string, defaultVal T) T {
-	envStr, has := os.LookupEnv(name)
-	if !has {
-		return defaultVal
+	if _, has := os.LookupEnv(name); has {
+		return Require[T](name)
 	}
 
-	var v any = defaultVal
+	return defaultVal
+}
+
+// Require env var.
+func Require[T EnvType](name string) T {
+	envStr, has := os.LookupEnv(name)
+	if !has {
+		panic("required env variable not found: " + name)
+	}
+
+	var v any = *new(T)
 
 	switch v.(type) {
 	case bool:

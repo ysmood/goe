@@ -28,3 +28,8 @@ func init() {
 func Get[T lib.EnvType](name string, defaultVal T) T {
 	return lib.Get(name, defaultVal)
 }
+
+// Require is a shortcut for [lib.Require].
+func Require[T lib.EnvType](name string) T {
+	return lib.Require[T](name)
+}
