@@ -1,10 +1,10 @@
-package lib_test
+package goe_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/ysmood/dotenv/lib"
+	lib "github.com/ysmood/goe"
 	"github.com/ysmood/got"
 )
 

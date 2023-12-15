@@ -1,9 +1,10 @@
 # Overview
 
-Load the `.env` file from current directory or one of the parent directories, then use it to set the process environment variables.
+It provide some common helpers to load environment variables.
 
-It also provides a function to parse the value of environment variables, it uses generics so you don't need to cast the value manually.
+- Loader function that uses generics so you don't need to cast the value manually.
+- Load helper that recursively search for the `.env` file in parent folders until it finds one.
 
 For usage check the [example](example/basic.go).
 
-About the format of `.env`: [link](https://docs.docker.com/compose/environment-variables/env-file/)
+About the format of `.env`: [link](https://pkg.go.dev/github.com/hashicorp/go-envparse)

@@ -3,15 +3,16 @@ package main
 import (
 	"fmt"
 
-	dotenv "github.com/ysmood/dotenv"
+	"github.com/ysmood/goe"
+	_ "github.com/ysmood/goe/load" // load the .env file
 )
 
 func main() {
 	// Get a optional env variable
-	num := dotenv.Get("NUM", 0)
+	num := goe.Get("NUM", 0)
 
 	// Get a required env variable
-	str := dotenv.Require[string]("STR")
+	str := goe.Require[string]("STR")
 
 	// It will output the env variables in "../.env"
 	// The output will be:

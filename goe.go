@@ -1,5 +1,5 @@
-// Package lib ...
-package lib
+// Package goe provide helpers to load environment variables.
+package goe
 
 import (
 	"fmt"
@@ -8,19 +8,37 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/joho/godotenv"
+	envparse "github.com/hashicorp/go-envparse"
 )
 
 // Load .env file return informative message.
-func Load() (string, error) {
+func Load(override bool) (string, error) {
 	path := LookupFile(".env")
 	if path == "" {
 		return "No .env file to load", nil
 	}
 
-	err := godotenv.Load(path)
+	file, err := os.Open(path) //nolint: gosec
 	if err != nil {
-		return "", fmt.Errorf("godotenv: %w", err)
+		return "", fmt.Errorf("failed to open .env file: %w", err)
+	}
+
+	dict, err := envparse.Parse(file)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse .env file: %w", err)
+	}
+
+	for k, v := range dict {
+		if !override {
+			if _, has := os.LookupEnv(k); has {
+				continue
+			}
+		}
+
+		err = os.Setenv(k, v)
+		if err != nil {
+			return "", fmt.Errorf("failed to set env variable: %w", err)
+		}
 	}
 
 	return fmt.Sprintf("Loaded environment variables from: %s", path), nil

@@ -1,14 +1,14 @@
 package test_test
 
 import (
+	"fmt"
 	"os"
-	"testing"
 
-	_ "github.com/ysmood/dotenv"
+	_ "github.com/ysmood/goe/load"
 )
 
-func TestBasic(t *testing.T) {
-	if os.Getenv("STR") != "hello" {
-		t.Fail()
-	}
+func Example_loadDotEnvFileRecursively() {
+	fmt.Println(os.Getenv("STR"))
+
+	// Output: hello
 }
