@@ -25,7 +25,7 @@ func TestGet(t *testing.T) {
 	g.Eq(goe.Get("BOOL", false), true)
 	g.Eq(goe.Get("BOOL_DEFAULT", true), true)
 	g.Eq(goe.Get("NUM", 0), 2)
-	g.Eq(goe.Get("NUM_DEFAULT", 1), 1)
+	g.Eq(goe.Get("NUM_DEFAULT", uint(1)), 1)
 	g.Eq(goe.Get("STR", ""), "ok")
 	g.Eq(goe.Get("STR_DEFAULT", "yes"), "yes")
 	g.Eq(goe.Get("FLOAT", 0.0), 1.2)

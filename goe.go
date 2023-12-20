@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"time"
 
 	envparse "github.com/hashicorp/go-envparse"
+	"golang.org/x/exp/constraints"
 )
 
 // Load .env file and return informative message about what this function has done.
@@ -68,7 +70,7 @@ func LookupFile(file string) string {
 }
 
 type EnvType interface {
-	bool | string | int | float64 | time.Duration
+	bool | string | time.Duration | constraints.Float | constraints.Integer
 }
 
 // Is check if the env var with the name is equal to the val.
@@ -114,21 +116,29 @@ func Require[T EnvType](name string) T {
 	case string:
 		v = envStr
 
-	case int:
+	case int, int8, int16, int32, int64:
 		i, err := strconv.ParseInt(envStr, 10, 64)
 		if err != nil {
 			panic(err)
 		}
 
-		v = int(i)
+		v = convert(i, v)
 
-	case float64:
+	case uint, uint8, uint16, uint32, uint64:
+		i, err := strconv.ParseUint(envStr, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+
+		v = convert(i, v)
+
+	case float32, float64:
 		f, err := strconv.ParseFloat(envStr, 64)
 		if err != nil {
 			panic(err)
 		}
 
-		v = f
+		v = convert(f, v)
 
 	case time.Duration:
 		d, err := time.ParseDuration(envStr)
@@ -140,4 +150,8 @@ func Require[T EnvType](name string) T {
 	}
 
 	return v.(T)
+}
+
+func convert(from any, to any) any {
+	return reflect.ValueOf(from).Convert(reflect.TypeOf(to)).Interface()
 }
