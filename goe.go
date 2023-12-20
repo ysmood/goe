@@ -11,7 +11,8 @@ import (
 	envparse "github.com/hashicorp/go-envparse"
 )
 
-// Load .env file return informative message.
+// Load .env file and return informative message about what this function has done.
+// It will recursively search for the `.env` file in parent folders until it finds one.
 func Load(override bool) (string, error) {
 	path := LookupFile(".env")
 	if path == "" {
@@ -70,7 +71,8 @@ type EnvType interface {
 	bool | string | int | float64 | time.Duration
 }
 
-// Get env var with default value.
+// Get env var with the name. It will return the defaultVal if it's not found.
+// If the env var is found, it will use [Require] to parse the value.
 func Get[T EnvType](name string, defaultVal T) T {
 	if _, has := os.LookupEnv(name); has {
 		return Require[T](name)
@@ -79,7 +81,9 @@ func Get[T EnvType](name string, defaultVal T) T {
 	return defaultVal
 }
 
-// Require env var.
+// Require load and parse the env var with the name.
+// It will auto detect the type of the env var and parse it.
+// It will panic if the env var is not found.
 func Require[T EnvType](name string) T {
 	envStr, has := os.LookupEnv(name)
 	if !has {
