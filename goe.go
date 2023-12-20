@@ -74,9 +74,11 @@ type EnvType interface {
 // Is check if the env var with the name is equal to the val.
 // If the env var is not found, it will return false.
 func Is[T EnvType](name string, val T) bool {
-	d := new(T)
+	if _, has := os.LookupEnv(name); !has {
+		return false
+	}
 
-	return Get(name, *d) == val
+	return Require[T](name) == val
 }
 
 // Get env var with the name. It will return the defaultVal if it's not found.
