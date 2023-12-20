@@ -38,6 +38,8 @@ func TestGet(t *testing.T) {
 	g.Eq(g.Panic(func() {
 		goe.Require[int]("KEY")
 	}), "required env variable not found: KEY")
+
+	g.Has(goe.ReadFile("go.mod"), "github.com/ysmood/goe")
 }
 
 func TestLoad(t *testing.T) {

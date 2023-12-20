@@ -102,11 +102,16 @@ func Require[T EnvType](name string) T {
 		panic("required env variable not found: " + name)
 	}
 
+	return Parse[T](envStr)
+}
+
+// Parse the str to the type T.
+func Parse[T EnvType](str string) T {
 	var v any = *new(T)
 
 	switch v.(type) {
 	case bool:
-		b, err := strconv.ParseBool(envStr)
+		b, err := strconv.ParseBool(str)
 		if err != nil {
 			panic(err)
 		}
@@ -114,10 +119,10 @@ func Require[T EnvType](name string) T {
 		v = b
 
 	case string:
-		v = envStr
+		v = str
 
 	case int, int8, int16, int32, int64:
-		i, err := strconv.ParseInt(envStr, 10, 64)
+		i, err := strconv.ParseInt(str, 10, 64)
 		if err != nil {
 			panic(err)
 		}
@@ -125,7 +130,7 @@ func Require[T EnvType](name string) T {
 		v = convert(i, v)
 
 	case uint, uint8, uint16, uint32, uint64:
-		i, err := strconv.ParseUint(envStr, 10, 64)
+		i, err := strconv.ParseUint(str, 10, 64)
 		if err != nil {
 			panic(err)
 		}
@@ -133,7 +138,7 @@ func Require[T EnvType](name string) T {
 		v = convert(i, v)
 
 	case float32, float64:
-		f, err := strconv.ParseFloat(envStr, 64)
+		f, err := strconv.ParseFloat(str, 64)
 		if err != nil {
 			panic(err)
 		}
@@ -141,7 +146,7 @@ func Require[T EnvType](name string) T {
 		v = convert(f, v)
 
 	case time.Duration:
-		d, err := time.ParseDuration(envStr)
+		d, err := time.ParseDuration(str)
 		if err != nil {
 			panic(err)
 		}
@@ -150,6 +155,16 @@ func Require[T EnvType](name string) T {
 	}
 
 	return v.(T)
+}
+
+// ReadFile read file and return the content as string.
+func ReadFile(path string) string {
+	b, err := os.ReadFile(path) //nolint: gosec
+	if err != nil {
+		panic(err)
+	}
+
+	return string(b)
 }
 
 func convert(from any, to any) any {
