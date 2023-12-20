@@ -71,6 +71,14 @@ type EnvType interface {
 	bool | string | int | float64 | time.Duration
 }
 
+// Is check if the env var with the name is equal to the val.
+// If the env var is not found, it will return false.
+func Is[T EnvType](name string, val T) bool {
+	d := new(T)
+
+	return Get(name, *d) == val
+}
+
 // Get env var with the name. It will return the defaultVal if it's not found.
 // If the env var is found, it will use [Require] to parse the value.
 func Get[T EnvType](name string, defaultVal T) T {
