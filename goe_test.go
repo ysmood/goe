@@ -1,12 +1,23 @@
 package goe_test
 
 import (
+	"os/exec"
 	"testing"
 	"time"
 
 	"github.com/ysmood/goe"
 	"github.com/ysmood/got"
 )
+
+func TestExample(t *testing.T) {
+	g := got.T(t)
+
+	out, err := exec.Command("go", "run", "./example").CombinedOutput()
+	g.E(err)
+
+	g.Has(string(out), `goe/.env
+2 hello world true`)
+}
 
 func TestGet(t *testing.T) {
 	g := got.T(t)
