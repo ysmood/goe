@@ -17,8 +17,12 @@ func main() {
 	// Check if the env variable is equal to specified value
 	isDev := goe.Is("ENV", "dev")
 
+	list := goe.GetList("LIST", []int{})
+
+	numMap := goe.GetMap("MAP", map[int]int{})
+
 	// It will output the env variables in "../.env"
-	// The output will be:
-	//	2 hello world true
-	fmt.Println(num+1, str+" world", isDev)
+	// Output:
+	//	1 hello true [1 2] map[1:2 3:4]
+	fmt.Println(num, str, isDev, list, numMap)
 }

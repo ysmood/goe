@@ -16,7 +16,7 @@ func TestExample(t *testing.T) {
 	g.E(err)
 
 	g.Has(string(out), `goe/.env
-2 hello world true`)
+1 hello true [1 2] map[1:2 3:4]`)
 }
 
 func TestGet(t *testing.T) {
@@ -64,4 +64,23 @@ func TestLoad(t *testing.T) {
 	g.E(goe.Load(false))
 
 	g.Eq(goe.Get("STR", ""), "hello")
+}
+
+func TestGetList(t *testing.T) {
+	g := got.T(t)
+
+	t.Setenv("LIST", "1,2")
+	g.Eq(goe.GetList("LIST", []int{}), []int{1, 2})
+
+	g.Eq(goe.GetList("DEFAULT", []int{1}), []int{1})
+}
+
+func TestGetMap(t *testing.T) {
+	g := got.T(t)
+
+	t.Setenv("MAP", "a:1,b:2")
+	g.Eq(
+		goe.GetMap("MAP", map[string]int{"a": 2, "c": 3}),
+		map[string]int{"a": 1, "b": 2, "c": 3},
+	)
 }

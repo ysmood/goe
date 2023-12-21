@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	envparse "github.com/hashicorp/go-envparse"
@@ -99,6 +100,66 @@ func Is[T EnvType](name string, val T) bool {
 func Get[T EnvType](name string, defaultVal T) T {
 	if _, has := os.LookupEnv(name); has {
 		return Require[T](name)
+	}
+
+	return defaultVal
+}
+
+// GetList is a shortcut for [GetListWithSep] with separator set to ",".
+func GetList[T EnvType](name string, defaultVal []T) []T {
+	return GetListWithSep(name, ",", defaultVal)
+}
+
+// GetListWithSep returns env var with the name. It will return the defaultVal if it's not found.
+// It will parse the value as a list of type T with separator.
+func GetListWithSep[T EnvType](name, separator string, defaultVal []T) []T {
+	if _, has := os.LookupEnv(name); !has {
+		return defaultVal
+	}
+
+	var out []T
+
+	for _, s := range strings.Split(Get(name, ""), separator) {
+		v, err := Parse[T](s)
+		if err != nil {
+			panic(err)
+		}
+
+		out = append(out, v)
+	}
+
+	return out
+}
+
+// GetMap is a shortcut for [GetMapWithSep] with pairSep set to "," and kvSep set to ":".
+func GetMap[K, V EnvType](name string, defaultVal map[K]V) map[K]V {
+	return GetMapWithSep(name, ",", ":", defaultVal)
+}
+
+// GetMapWithSep returns env var with the name.
+// It will override the key-value pairs in defaultVal with the parsed pairs.
+// It will parse the value as a map of type K, V with two types of separators,
+// the pairSep is for key-value pairs, and the kvSep is for key and value.
+func GetMapWithSep[K, V EnvType](name, pairSep, kvSep string, defaultVal map[K]V) map[K]V {
+	str := Get(name, "")
+
+	for _, s := range strings.Split(str, pairSep) {
+		kv := strings.Split(s, kvSep)
+		if len(kv) != 2 { //nolint: gomnd
+			panic("invalid map format: " + str)
+		}
+
+		k, err := Parse[K](kv[0])
+		if err != nil {
+			panic(err)
+		}
+
+		v, err := Parse[V](kv[1])
+		if err != nil {
+			panic(err)
+		}
+
+		defaultVal[k] = v
 	}
 
 	return defaultVal

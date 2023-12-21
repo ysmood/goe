@@ -13,6 +13,7 @@ linters:
     - varnamelen
     - forcetypeassert
     - ireturn
+    - prealloc
 
     - structcheck
     - interfacer
