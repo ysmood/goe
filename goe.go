@@ -266,6 +266,17 @@ func Parse[T EnvType](str string) (T, error) { //nolint: cyclop
 	return v.Interface().(T), nil
 }
 
+// Unset env var with [os.Unsetenv].
+// Useful for secret unset to prevent leaking by other packages.
+func Unset(name string) struct{} {
+	err := os.Unsetenv(name)
+	if err != nil {
+		panic("failed to unset env variable: " + name)
+	}
+
+	return struct{}{}
+}
+
 // Time parse the str to time.Time.
 func Time(str string) (time.Time, error) {
 	t, err := time.Parse(time.RFC3339, str)

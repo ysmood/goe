@@ -12,7 +12,8 @@ var (
 	num = goe.Get("NUM", 0)
 
 	// Get a required env variable.
-	str = goe.Require[string]("STR")
+	secret = goe.Require[string]("SECRET")
+	_      = goe.Unset("SECRET")
 
 	// Check if the env variable is equal to specified value.
 	isDev = goe.Is("ENV", "dev")
@@ -34,5 +35,5 @@ func main() {
 	// It will output the env variables in "../.env"
 	// Output:
 	//	1 hello true [1 2] map[1:2 3:4] dev 2023
-	fmt.Println(num, str, isDev, list, numMap, expanded, time.Format("2006"))
+	fmt.Println(num, secret, isDev, list, numMap, expanded, time.Format("2006"))
 }

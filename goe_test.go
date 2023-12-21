@@ -69,7 +69,7 @@ func TestLoad(t *testing.T) {
 
 	g.E(goe.Load(false, true))
 
-	g.Eq(goe.Get("STR", ""), "hello")
+	g.Eq(goe.Get("SECRET", ""), "hello")
 	g.Has(goe.Get("EXPANDED", ""), "dev")
 }
 
