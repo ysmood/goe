@@ -16,7 +16,7 @@ func TestExample(t *testing.T) {
 	g.E(err)
 
 	g.Has(string(out), `goe/.env
-1 hello true [1 2] map[1:2 3:4]`)
+1 hello true [1 2] map[1:2 3:4] dev`)
 }
 
 func TestGet(t *testing.T) {
@@ -61,9 +61,10 @@ func TestGet(t *testing.T) {
 func TestLoad(t *testing.T) {
 	g := got.T(t)
 
-	g.E(goe.Load(false))
+	g.E(goe.Load(false, true))
 
 	g.Eq(goe.Get("STR", ""), "hello")
+	g.Has(goe.Get("EXPANDED", ""), "dev")
 }
 
 func TestGetList(t *testing.T) {

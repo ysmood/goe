@@ -17,7 +17,8 @@ import (
 
 // Load .env file and return informative message about what this function has done.
 // It will recursively search for the `.env` file in parent folders until it finds one.
-func Load(override bool) (string, error) {
+// It uses [LoadDotEnv] to parse and load the .env content.
+func Load(override, expand bool) (string, error) {
 	path := LookupFile(".env")
 	if path == "" {
 		return "No .env file to load", nil
@@ -28,7 +29,7 @@ func Load(override bool) (string, error) {
 		return "", fmt.Errorf("failed to open .env file: %w", err)
 	}
 
-	err = LoadDotEnv(override, content)
+	err = LoadDotEnv(override, expand, content)
 	if err != nil {
 		return "", err
 	}
@@ -37,7 +38,9 @@ func Load(override bool) (string, error) {
 }
 
 // LoadDotEnv load the .env content.
-func LoadDotEnv(override bool, content []byte) error {
+// If override is true, it will override the existing env vars.
+// If expand is true, it will expand the env vars via [os.ExpandEnv].
+func LoadDotEnv(override, expand bool, content []byte) error {
 	dict, err := envparse.Parse(bytes.NewReader(content))
 	if err != nil {
 		return fmt.Errorf("failed to parse .env file: %w", err)
@@ -53,6 +56,20 @@ func LoadDotEnv(override bool, content []byte) error {
 		err = os.Setenv(k, v)
 		if err != nil {
 			return fmt.Errorf("failed to set env variable: %w", err)
+		}
+	}
+
+	if expand {
+		for k, v := range dict {
+			expanded := os.ExpandEnv(v)
+			if expanded == v {
+				continue
+			}
+
+			err = os.Setenv(k, expanded)
+			if err != nil {
+				return fmt.Errorf("failed to expand env variable: %w", err)
+			}
 		}
 	}
 

@@ -1,6 +1,5 @@
-// Package load loads environment variables from a .env file,
-// it will recursively search for the file in parent folders until it finds one.
-// It will print all the side effects to the console to make it easier to debug.
+// Package load loads environment variables from a .env file.
+// It uses [goe.Load] to load the .env file, override set to false, expand set to true.
 package load
 
 import (
@@ -18,7 +17,7 @@ var prefix = fmt.Sprintf("[%s] ", reflect.TypeOf(info{}).PkgPath())
 func init() {
 	lg := log.New(log.Writer(), prefix, log.Flags())
 
-	msg, err := goe.Load(false)
+	msg, err := goe.Load(false, true)
 	if err != nil {
 		lg.Fatal(err)
 	}
