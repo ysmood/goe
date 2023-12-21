@@ -2,6 +2,7 @@
 package goe
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -21,14 +22,24 @@ func Load(override bool) (string, error) {
 		return "No .env file to load", nil
 	}
 
-	file, err := os.Open(path) //nolint: gosec
+	content, err := os.ReadFile(path) //nolint: gosec
 	if err != nil {
 		return "", fmt.Errorf("failed to open .env file: %w", err)
 	}
 
-	dict, err := envparse.Parse(file)
+	err = LoadDotEnv(override, content)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse .env file: %w", err)
+		return "", err
+	}
+
+	return fmt.Sprintf("Loaded environment variables from: %s", path), nil
+}
+
+// LoadDotEnv load the .env content.
+func LoadDotEnv(override bool, content []byte) error {
+	dict, err := envparse.Parse(bytes.NewReader(content))
+	if err != nil {
+		return fmt.Errorf("failed to parse .env file: %w", err)
 	}
 
 	for k, v := range dict {
@@ -40,11 +51,11 @@ func Load(override bool) (string, error) {
 
 		err = os.Setenv(k, v)
 		if err != nil {
-			return "", fmt.Errorf("failed to set env variable: %w", err)
+			return fmt.Errorf("failed to set env variable: %w", err)
 		}
 	}
 
-	return fmt.Sprintf("Loaded environment variables from: %s", path), nil
+	return nil
 }
 
 // LookupFile file recursively.
