@@ -16,7 +16,7 @@ func TestExample(t *testing.T) {
 	g.E(err)
 
 	g.Has(string(out), `.env
-1 hello true [1 2] map[1:2 3:4] dev`)
+1 hello true [1 2] map[1:2 3:4] dev 2023`)
 }
 
 func TestGet(t *testing.T) {
@@ -28,10 +28,15 @@ func TestGet(t *testing.T) {
 	t.Setenv("STR", "ok")
 	t.Setenv("FLOAT", "1.2")
 	t.Setenv("DURATION", "1m")
+	t.Setenv("TIME", "2023-12-21T15:41:51+08:00")
 
 	g.True(goe.Is("ENV", "dev"))
 	g.False(goe.Is("ENV", "stg"))
 	g.False(goe.Is("NOT_EXISTS", "dev"))
+
+	type MyInt int
+
+	g.Eq(goe.Get("NUM", MyInt(0)), 2)
 
 	g.Eq(goe.Get("BOOL", false), true)
 	g.Eq(goe.Get("BOOL_DEFAULT", true), true)
@@ -43,6 +48,7 @@ func TestGet(t *testing.T) {
 	g.Eq(goe.Get("FLOAT_DEFAULT", 1.1), 1.1)
 	g.Eq(goe.Get("DURATION", time.Second), time.Minute)
 	g.Eq(goe.Get("DURATION_DEFAULT", time.Hour), time.Hour)
+	g.Eq(goe.GetWithParser("TIME", goe.Time, time.Time{}).Format("2006"), "2023")
 
 	g.Eq(goe.Require[int]("NUM"), 2)
 

@@ -91,7 +91,7 @@ func LookupFile(file string) string {
 }
 
 type EnvType interface {
-	bool | string | time.Duration | constraints.Float | constraints.Integer
+	~bool | ~string | time.Duration | constraints.Float | constraints.Integer
 }
 
 // Is check if the env var with the name is equal to the val.
@@ -174,6 +174,14 @@ func GetMapWithSep[K, V EnvType](name, pairSep, kvSep string, defaultVal map[K]V
 	return defaultVal
 }
 
+func GetWithParser[T any](name string, parser func(string) (T, error), defaultVal T) T {
+	if _, has := os.LookupEnv(name); has {
+		return RequireWithParser(name, parser)
+	}
+
+	return defaultVal
+}
+
 // Require load and parse the env var with the name.
 // It will auto detect the type of the env var and parse it.
 // It will panic if the env var is not found.
@@ -191,59 +199,85 @@ func Require[T EnvType](name string) T {
 	return v
 }
 
+// RequireWithParser load and parse the env var with the name.
+func RequireWithParser[T any](name string, parser func(string) (T, error)) T {
+	v, err := parser(Require[string](name))
+	if err != nil {
+		panic("failed to parse env variable: " + name + ": " + err.Error())
+	}
+
+	return v
+}
+
 // Parse the str to the type T.
 func Parse[T EnvType](str string) (T, error) { //nolint: cyclop
-	var v any = *new(T)
+	v := reflect.ValueOf(new(T)).Elem()
+	empty := v.Interface().(T)
 
-	switch v.(type) {
-	case bool:
-		b, err := strconv.ParseBool(str)
-		if err != nil {
-			return v.(T), fmt.Errorf("failed to parse bool: %w", err)
-		}
-
-		v = b
-
-	case string:
-		v = str
-
-	case int, int8, int16, int32, int64:
-		i, err := strconv.ParseInt(str, 10, 64)
-		if err != nil {
-			return v.(T), fmt.Errorf("failed to parse int: %w", err)
-		}
-
-		v = convert(i, v)
-
-	case uint, uint8, uint16, uint32, uint64:
-		i, err := strconv.ParseUint(str, 10, 64)
-		if err != nil {
-			return v.(T), fmt.Errorf("failed to parse uint: %w", err)
-		}
-
-		v = convert(i, v)
-
-	case float32, float64:
-		f, err := strconv.ParseFloat(str, 64)
-		if err != nil {
-			return v.(T), fmt.Errorf("failed to parse float: %w", err)
-		}
-
-		v = convert(f, v)
-
+	switch v.Interface().(type) { //nolint: gocritic
 	case time.Duration:
 		d, err := time.ParseDuration(str)
 		if err != nil {
-			return v.(T), fmt.Errorf("failed to parse duration: %w", err)
+			return empty, fmt.Errorf("failed to parse duration: %w", err)
 		}
 
-		v = d
+		v.Set(reflect.ValueOf(d))
+
+		return v.Interface().(T), nil
 	}
 
-	return v.(T), nil
+	switch v.Kind() { //nolint: exhaustive
+	case reflect.Bool:
+		b, err := strconv.ParseBool(str)
+		if err != nil {
+			return empty, fmt.Errorf("failed to parse bool: %w", err)
+		}
+
+		v.Set(reflect.ValueOf(b))
+
+	case reflect.String:
+		v = convert(str, v)
+
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		i, err := strconv.ParseInt(str, 10, 64)
+		if err != nil {
+			return empty, fmt.Errorf("failed to parse int: %w", err)
+		}
+
+		v = convert(i, v)
+
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		i, err := strconv.ParseUint(str, 10, 64)
+		if err != nil {
+			return empty, fmt.Errorf("failed to parse uint: %w", err)
+		}
+
+		v = convert(i, v)
+
+	case reflect.Float32, reflect.Float64:
+		f, err := strconv.ParseFloat(str, 64)
+		if err != nil {
+			return empty, fmt.Errorf("failed to parse float: %w", err)
+		}
+
+		v = convert(f, v)
+	}
+
+	return v.Interface().(T), nil
+}
+
+// Time parse the str to time.Time.
+func Time(str string) (time.Time, error) {
+	t, err := time.Parse(time.RFC3339, str)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("failed to parse time: %w", err)
+	}
+
+	return t, nil
 }
 
 // ReadFile read file and return the content as string.
+// Useful when expanding file path in env var.
 func ReadFile(path string) string {
 	b, err := os.ReadFile(path)
 	if err != nil {
@@ -253,6 +287,6 @@ func ReadFile(path string) string {
 	return string(b)
 }
 
-func convert(from any, to any) any {
-	return reflect.ValueOf(from).Convert(reflect.TypeOf(to)).Interface()
+func convert(from any, to reflect.Value) reflect.Value {
+	return reflect.ValueOf(from).Convert(to.Type())
 }

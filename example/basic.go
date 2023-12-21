@@ -26,8 +26,11 @@ func main() {
 	// Get a expanded env variable from expression like EXPANDED=${ENV}
 	expanded := goe.Get("EXPANDED", "")
 
+	// Get a custom type from env variable
+	time := goe.RequireWithParser("TIME", goe.Time)
+
 	// It will output the env variables in "../.env"
 	// Output:
-	//	1 hello true [1 2] map[1:2 3:4] dev
-	fmt.Println(num, str, isDev, list, numMap, expanded)
+	//	1 hello true [1 2] map[1:2 3:4] dev 2023
+	fmt.Println(num, str, isDev, list, numMap, expanded, time.Format("2006"))
 }
