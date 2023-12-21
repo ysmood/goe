@@ -39,6 +39,11 @@ func TestGet(t *testing.T) {
 		goe.Require[int]("KEY")
 	}), "required env variable not found: KEY")
 
+	g.Eq(g.Panic(func() {
+		t.Setenv("WRONG_INT", "xxx")
+		goe.Get("WRONG_INT", 0)
+	}).(error).Error(), `failed to parse int: strconv.ParseInt: parsing "xxx": invalid syntax`)
+
 	g.Has(goe.ReadFile("go.mod"), "github.com/ysmood/goe")
 }
 

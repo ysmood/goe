@@ -113,18 +113,23 @@ func Require[T EnvType](name string) T {
 		panic("required env variable not found: " + name)
 	}
 
-	return Parse[T](envStr)
+	v, err := Parse[T](envStr)
+	if err != nil {
+		panic(err)
+	}
+
+	return v
 }
 
 // Parse the str to the type T.
-func Parse[T EnvType](str string) T {
+func Parse[T EnvType](str string) (T, error) {
 	var v any = *new(T)
 
 	switch v.(type) {
 	case bool:
 		b, err := strconv.ParseBool(str)
 		if err != nil {
-			panic(err)
+			return v.(T), fmt.Errorf("failed to parse bool: %w", err)
 		}
 
 		v = b
@@ -135,7 +140,7 @@ func Parse[T EnvType](str string) T {
 	case int, int8, int16, int32, int64:
 		i, err := strconv.ParseInt(str, 10, 64)
 		if err != nil {
-			panic(err)
+			return v.(T), fmt.Errorf("failed to parse int: %w", err)
 		}
 
 		v = convert(i, v)
@@ -143,7 +148,7 @@ func Parse[T EnvType](str string) T {
 	case uint, uint8, uint16, uint32, uint64:
 		i, err := strconv.ParseUint(str, 10, 64)
 		if err != nil {
-			panic(err)
+			return v.(T), fmt.Errorf("failed to parse uint: %w", err)
 		}
 
 		v = convert(i, v)
@@ -151,7 +156,7 @@ func Parse[T EnvType](str string) T {
 	case float32, float64:
 		f, err := strconv.ParseFloat(str, 64)
 		if err != nil {
-			panic(err)
+			return v.(T), fmt.Errorf("failed to parse float: %w", err)
 		}
 
 		v = convert(f, v)
@@ -159,13 +164,13 @@ func Parse[T EnvType](str string) T {
 	case time.Duration:
 		d, err := time.ParseDuration(str)
 		if err != nil {
-			panic(err)
+			return v.(T), fmt.Errorf("failed to parse duration: %w", err)
 		}
 
 		v = d
 	}
 
-	return v.(T)
+	return v.(T), nil
 }
 
 // ReadFile read file and return the content as string.
