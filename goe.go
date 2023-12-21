@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	envparse "github.com/hashicorp/go-envparse"
+	envparse "github.com/ysmood/goe/pkg/envparse"
 	"golang.org/x/exp/constraints"
 )
 
@@ -24,7 +24,7 @@ func Load(override, expand bool) (string, error) {
 		return "No .env file to load", nil
 	}
 
-	content, err := os.ReadFile(path) //nolint: gosec
+	content, err := os.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("failed to open .env file: %w", err)
 	}
@@ -41,35 +41,27 @@ func Load(override, expand bool) (string, error) {
 // If override is true, it will override the existing env vars.
 // If expand is true, it will expand the env vars via [os.ExpandEnv].
 func LoadDotEnv(override, expand bool, content []byte) error {
-	dict, err := envparse.Parse(bytes.NewReader(content))
+	ps, err := envparse.Parse(bytes.NewReader(content))
 	if err != nil {
 		return fmt.Errorf("failed to parse .env file: %w", err)
 	}
 
-	for k, v := range dict {
+	for _, p := range ps {
+		k, v := p.Key, p.Val
+
 		if !override {
 			if _, has := os.LookupEnv(k); has {
 				continue
 			}
 		}
 
+		if expand {
+			v = os.ExpandEnv(v)
+		}
+
 		err = os.Setenv(k, v)
 		if err != nil {
 			return fmt.Errorf("failed to set env variable: %w", err)
-		}
-	}
-
-	if expand {
-		for k, v := range dict {
-			expanded := os.ExpandEnv(v)
-			if expanded == v {
-				continue
-			}
-
-			err = os.Setenv(k, expanded)
-			if err != nil {
-				return fmt.Errorf("failed to expand env variable: %w", err)
-			}
 		}
 	}
 
@@ -200,7 +192,7 @@ func Require[T EnvType](name string) T {
 }
 
 // Parse the str to the type T.
-func Parse[T EnvType](str string) (T, error) {
+func Parse[T EnvType](str string) (T, error) { //nolint: cyclop
 	var v any = *new(T)
 
 	switch v.(type) {
@@ -253,7 +245,7 @@ func Parse[T EnvType](str string) (T, error) {
 
 // ReadFile read file and return the content as string.
 func ReadFile(path string) string {
-	b, err := os.ReadFile(path) //nolint: gosec
+	b, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}

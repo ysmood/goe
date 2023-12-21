@@ -1,5 +1,6 @@
 run:
-  skip-dirs-use-default: false
+  skip-dirs:
+    - pkg/envparse
 
 linters:
   enable-all: true
@@ -25,13 +26,3 @@ linters:
     - maligned
     - nosnakecase
     - scopelint
-
-linters-settings:
-  gocyclo:
-    min-complexity: 15
-
-  cyclop:
-    max-complexity: 20
-
-issues:
-  exclude-use-default: false
