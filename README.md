@@ -2,9 +2,12 @@
 
 It provide some common helpers to load environment variables.
 
-- Loader function that uses generics so you don't need to cast the value manually.
-- Load helper that recursively search for the `.env` file in parent folders until it finds one.
+- No struct tag magic, only composable functions.
+- Uses generics so you don't need to cast the value manually.
+- Recursively searches for the `.env` file in parent folders until it finds one.
 - Auto [expand](https://pkg.go.dev/os#Expand) the environment variables in the `.env` file.
+- Auto read file content if the value is a file path.
+- Customizable parser.
 
 For usage check the [example](example/basic.go).
 

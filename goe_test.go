@@ -16,7 +16,7 @@ func TestExample(t *testing.T) {
 	g.E(err)
 
 	g.Has(string(out), `.env
-1 hello true [1 2] map[1:2 3:4] dev 2023`)
+1 hello true [1 2] map[1:2 3:4] dev hello true 2023`)
 }
 
 func TestGet(t *testing.T) {
@@ -60,8 +60,6 @@ func TestGet(t *testing.T) {
 		t.Setenv("WRONG_INT", "xxx")
 		goe.Get("WRONG_INT", 0)
 	}).(error).Error(), `failed to parse int: strconv.ParseInt: parsing "xxx": invalid syntax`)
-
-	g.Has(goe.ReadFile("go.mod"), "github.com/ysmood/goe")
 }
 
 func TestLoad(t *testing.T) {

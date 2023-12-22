@@ -3,6 +3,7 @@ package goe
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -91,6 +92,10 @@ func LookupFile(file string) string {
 }
 
 type EnvType interface {
+	EnvKeyType | ~[]byte
+}
+
+type EnvKeyType interface {
 	~bool | ~string | time.Duration | constraints.Float | constraints.Integer
 }
 
@@ -101,7 +106,14 @@ func Is[T EnvType](name string, val T) bool {
 		return false
 	}
 
-	return Require[T](name) == val
+	a := any(Require[T](name))
+	b := any(val)
+
+	if _, ok := a.([]byte); ok {
+		return bytes.Equal(a.([]byte), b.([]byte))
+	}
+
+	return a == b
 }
 
 // Get env var with the name. It will return the defaultVal if it's not found.
@@ -141,7 +153,7 @@ func GetListWithSep[T EnvType](name, separator string, defaultVal []T) []T {
 }
 
 // GetMap is a shortcut for [GetMapWithSep] with pairSep set to "," and kvSep set to ":".
-func GetMap[K, V EnvType](name string, defaultVal map[K]V) map[K]V {
+func GetMap[K EnvKeyType, V EnvType](name string, defaultVal map[K]V) map[K]V {
 	return GetMapWithSep(name, ",", ":", defaultVal)
 }
 
@@ -149,7 +161,7 @@ func GetMap[K, V EnvType](name string, defaultVal map[K]V) map[K]V {
 // It will override the key-value pairs in defaultVal with the parsed pairs.
 // It will parse the value as a map of type K, V with two types of separators,
 // the pairSep is for key-value pairs, and the kvSep is for key and value.
-func GetMapWithSep[K, V EnvType](name, pairSep, kvSep string, defaultVal map[K]V) map[K]V {
+func GetMapWithSep[K EnvKeyType, V EnvType](name, pairSep, kvSep string, defaultVal map[K]V) map[K]V {
 	str := Get(name, "")
 
 	for _, s := range strings.Split(str, pairSep) {
@@ -209,8 +221,12 @@ func RequireWithParser[T any](name string, parser func(string) (T, error)) T {
 	return v
 }
 
+var ErrNotSupported = fmt.Errorf("unsupported")
+
 // Parse the str to the type T.
-func Parse[T EnvType](str string) (T, error) { //nolint: cyclop
+// If T is []byte and str is a existing file path, the file content will be the env var,
+// or the str will be parsed as base64 and used as the env var.
+func Parse[T EnvType](str string) (T, error) { //nolint: funlen,cyclop
 	v := reflect.ValueOf(new(T)).Elem()
 	empty := v.Interface().(T)
 
@@ -261,6 +277,23 @@ func Parse[T EnvType](str string) (T, error) { //nolint: cyclop
 		}
 
 		v = convert(f, v)
+
+	case reflect.Slice:
+		if v.Type().Elem().Kind() != reflect.Uint8 {
+			return empty, fmt.Errorf("%w slice type: %s", ErrNotSupported, v.Type().String())
+		}
+
+		b, err := os.ReadFile(str)
+		if err == nil {
+			return convert(b, v).Interface().(T), nil
+		}
+
+		b, err = base64.StdEncoding.DecodeString(str)
+		if err != nil {
+			return empty, fmt.Errorf("failed to parse base64: %w", err)
+		}
+
+		v = convert(b, v)
 	}
 
 	return v.Interface().(T), nil
@@ -285,17 +318,6 @@ func Time(str string) (time.Time, error) {
 	}
 
 	return t, nil
-}
-
-// ReadFile read file and return the content as string.
-// Useful when expanding file path in env var.
-func ReadFile(path string) string {
-	b, err := os.ReadFile(path)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(b)
 }
 
 func convert(from any, to reflect.Value) reflect.Value {
