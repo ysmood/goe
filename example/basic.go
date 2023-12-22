@@ -31,7 +31,7 @@ var (
 	// Get base64 encoded binary data from env variable.
 	bin = goe.Get("BIN", []byte(""))
 
-	// Use the env var as file path and read the file content as returned value.
+	// Get file content if the env variable type is []byte and is a existing file path.
 	file = goe.Get("FILE", []byte(""))
 
 	// Get a custom type from env variable.

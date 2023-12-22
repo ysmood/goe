@@ -195,8 +195,8 @@ func GetWithParser[T any](name string, parser func(string) (T, error), defaultVa
 }
 
 // Require load and parse the env var with the name.
-// It will auto detect the type of the env var and parse it.
-// It will panic if the env var is not found.
+// It will panic if the env var is not found or failed to parse.
+// It uses [Parse] to parse the env var.
 func Require[T EnvType](name string) T {
 	envStr, has := os.LookupEnv(name)
 	if !has {
@@ -224,6 +224,7 @@ func RequireWithParser[T any](name string, parser func(string) (T, error)) T {
 var ErrNotSupported = fmt.Errorf("unsupported")
 
 // Parse the str to the type T.
+// It will auto detect the type of the env var and parse it.
 // If T is []byte and str is a existing file path, the file content will be the env var,
 // or the str will be parsed as base64 and used as the env var.
 func Parse[T EnvType](str string) (T, error) { //nolint: funlen,cyclop
