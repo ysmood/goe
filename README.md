@@ -9,6 +9,7 @@ It provide some common helpers to load environment variables.
 - Auto parse base64 encoded value.
 - Auto read file content if the value is a file path.
 - Customizable parser.
+- Composable functions, easy to extend.
 
 For usage check the [example](example/basic.go).
 

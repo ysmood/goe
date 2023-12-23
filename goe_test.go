@@ -73,7 +73,7 @@ func TestLoad(t *testing.T) {
 
 	g.Chdir("example")
 
-	g.E(goe.Load(false, true))
+	g.E(goe.Load(false, true, ".env"))
 
 	g.Eq(goe.Get("SECRET", ""), "hello")
 	g.Has(goe.Get("EXPANDED", ""), "dev")

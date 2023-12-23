@@ -17,31 +17,31 @@ import (
 )
 
 // Load .env file and return informative message about what this function has done.
-// It will recursively search for the `.env` file in parent folders until it finds one.
-// It uses [LoadDotEnv] to parse and load the .env content.
-func Load(override, expand bool) (string, error) {
-	path := LookupFile(".env")
-	if path == "" {
-		return "No .env file to load", nil
+// It will recursively search for the file in parent folders until it finds one.
+// It uses [LoadDotEnv] to parse and load the content.
+func Load(override, expand bool, file string) error {
+	path, err := LookupFile(file)
+	if err != nil {
+		return fmt.Errorf("failed to find .env file: %w", err)
 	}
 
 	content, err := os.ReadFile(path)
 	if err != nil {
-		return "", fmt.Errorf("failed to open .env file: %w", err)
+		return fmt.Errorf("failed to open .env file: %w", err)
 	}
 
-	err = LoadDotEnv(override, expand, content)
+	err = LoadContent(override, expand, content)
 	if err != nil {
-		return "", err
+		return fmt.Errorf("failed to load .env content: %w", err)
 	}
 
-	return fmt.Sprintf("Loaded environment variables from: %s", path), nil
+	return nil
 }
 
-// LoadDotEnv load the .env content.
+// LoadContent load the .env content.
 // If override is true, it will override the existing env vars.
 // If expand is true, it will expand the env vars via [os.ExpandEnv].
-func LoadDotEnv(override, expand bool, content []byte) error {
+func LoadContent(override, expand bool, content []byte) error {
 	ps, err := envparse.Parse(bytes.NewReader(content))
 	if err != nil {
 		return fmt.Errorf("failed to parse .env file: %w", err)
@@ -70,10 +70,10 @@ func LoadDotEnv(override, expand bool, content []byte) error {
 }
 
 // LookupFile file recursively.
-func LookupFile(file string) string {
+func LookupFile(file string) (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		return "", fmt.Errorf("failed to get current working directory: %w", err)
 	}
 
 	prev := ""
@@ -81,14 +81,14 @@ func LookupFile(file string) string {
 	for dir != prev {
 		p := filepath.Join(dir, file)
 		if _, err := os.Stat(p); err == nil {
-			return p
+			return p, nil
 		}
 
 		prev = dir
 		dir = filepath.Dir(dir)
 	}
 
-	return ""
+	return "", fmt.Errorf("%w: %s", os.ErrNotExist, file)
 }
 
 type EnvType interface {
@@ -128,14 +128,19 @@ func Get[T EnvType](name string, defaultVal T) T {
 
 // GetList is a shortcut for [GetListWithSep] with separator set to ",".
 func GetList[T EnvType](name string, defaultVal []T) []T {
-	return GetListWithSep(name, ",", defaultVal)
+	l, err := GetListWithSep(name, ",", defaultVal)
+	if err != nil {
+		panic("failed to parse list: " + err.Error())
+	}
+
+	return l
 }
 
 // GetListWithSep returns env var with the name. It will return the defaultVal if it's not found.
 // It will parse the value as a list of type T with separator.
-func GetListWithSep[T EnvType](name, separator string, defaultVal []T) []T {
+func GetListWithSep[T EnvType](name, separator string, defaultVal []T) ([]T, error) {
 	if _, has := os.LookupEnv(name); !has {
-		return defaultVal
+		return defaultVal, nil
 	}
 
 	var out []T
@@ -143,47 +148,54 @@ func GetListWithSep[T EnvType](name, separator string, defaultVal []T) []T {
 	for _, s := range strings.Split(Get(name, ""), separator) {
 		v, err := Parse[T](s)
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("failed to parse list: %w", err)
 		}
 
 		out = append(out, v)
 	}
 
-	return out
+	return out, nil
 }
 
 // GetMap is a shortcut for [GetMapWithSep] with pairSep set to "," and kvSep set to ":".
 func GetMap[K EnvKeyType, V EnvType](name string, defaultVal map[K]V) map[K]V {
-	return GetMapWithSep(name, ",", ":", defaultVal)
+	m, err := GetMapWithSep(name, ",", ":", defaultVal)
+	if err != nil {
+		panic("failed to parse map: " + err.Error())
+	}
+
+	return m
 }
+
+var ErrInvalidMapFormat = fmt.Errorf("invalid map format")
 
 // GetMapWithSep returns env var with the name.
 // It will override the key-value pairs in defaultVal with the parsed pairs.
 // It will parse the value as a map of type K, V with two types of separators,
 // the pairSep is for key-value pairs, and the kvSep is for key and value.
-func GetMapWithSep[K EnvKeyType, V EnvType](name, pairSep, kvSep string, defaultVal map[K]V) map[K]V {
+func GetMapWithSep[K EnvKeyType, V EnvType](name, pairSep, kvSep string, defaultVal map[K]V) (map[K]V, error) {
 	str := Get(name, "")
 
 	for _, s := range strings.Split(str, pairSep) {
 		kv := strings.Split(s, kvSep)
 		if len(kv) != 2 { //nolint: gomnd
-			panic("invalid map format: " + str)
+			return nil, fmt.Errorf("%w: %s", ErrInvalidMapFormat, str)
 		}
 
 		k, err := Parse[K](kv[0])
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("failed to parse map key: %w", err)
 		}
 
 		v, err := Parse[V](kv[1])
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("failed to parse map value: %w", err)
 		}
 
 		defaultVal[k] = v
 	}
 
-	return defaultVal
+	return defaultVal, nil
 }
 
 func GetWithParser[T any](name string, parser func(string) (T, error), defaultVal T) T {
@@ -221,7 +233,7 @@ func RequireWithParser[T any](name string, parser func(string) (T, error)) T {
 	return v
 }
 
-var ErrNotSupported = fmt.Errorf("unsupported")
+var ErrUnsupportedSliceType = fmt.Errorf("unsupported slice type")
 
 // Parse the str to the type T.
 // It will auto detect the type of the env var and parse it.
@@ -281,7 +293,7 @@ func Parse[T EnvType](str string) (T, error) { //nolint: funlen,cyclop
 
 	case reflect.Slice:
 		if v.Type().Elem().Kind() != reflect.Uint8 {
-			return empty, fmt.Errorf("%w slice type: %s", ErrNotSupported, v.Type().String())
+			return empty, fmt.Errorf("%w: %s", ErrUnsupportedSliceType, v.Type().String())
 		}
 
 		b, err := os.ReadFile(str)
