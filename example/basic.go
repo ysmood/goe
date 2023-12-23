@@ -29,10 +29,10 @@ var (
 	expanded = goe.Get("EXPANDED", "")
 
 	// Get base64 encoded binary data from env variable.
-	bin = goe.Get("BIN", []byte(""))
+	bin = goe.Get("BIN", []byte{})
 
 	// Get file content if the env variable type is []byte and is a existing file path.
-	file = goe.Get("FILE", []byte(""))
+	file = goe.Get("FILE", []byte{})
 
 	// Get a custom type from env variable.
 	time = goe.RequireWithParser("TIME", goe.Time)

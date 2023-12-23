@@ -41,6 +41,7 @@ func TestGet(t *testing.T) {
 	g.Eq(goe.Get("BOOL", false), true)
 	g.Eq(goe.Get("BOOL_DEFAULT", true), true)
 	g.Eq(goe.Get("NUM", 0), 2)
+	g.Eq(goe.Get("NUM", uint(0)), 2)
 	g.Eq(goe.Get("NUM_DEFAULT", uint(1)), 1)
 	g.Eq(goe.Get("STR", ""), "ok")
 	g.Eq(goe.Get("STR_DEFAULT", "yes"), "yes")
@@ -48,7 +49,12 @@ func TestGet(t *testing.T) {
 	g.Eq(goe.Get("FLOAT_DEFAULT", 1.1), 1.1)
 	g.Eq(goe.Get("DURATION", time.Second), time.Minute)
 	g.Eq(goe.Get("DURATION_DEFAULT", time.Hour), time.Hour)
+
 	g.Eq(goe.GetWithParser("TIME", goe.Time, time.Time{}).Format("2006"), "2023")
+
+	tm, err := time.Parse("2006", "2023")
+	g.E(err)
+	g.Eq(goe.GetWithParser("TIME_DEFAULT", goe.Time, tm).Format("2006"), "2023")
 
 	g.Eq(goe.Require[int]("NUM"), 2)
 
@@ -65,10 +71,13 @@ func TestGet(t *testing.T) {
 func TestLoad(t *testing.T) {
 	g := got.T(t)
 
+	g.Chdir("example")
+
 	g.E(goe.Load(false, true))
 
 	g.Eq(goe.Get("SECRET", ""), "hello")
 	g.Has(goe.Get("EXPANDED", ""), "dev")
+	g.Eq(goe.Get("BIN", []byte{}), []byte("hello"))
 }
 
 func TestGetList(t *testing.T) {
@@ -88,4 +97,13 @@ func TestGetMap(t *testing.T) {
 		goe.GetMap("MAP", map[string]int{"a": 2, "c": 3}),
 		map[string]int{"a": 1, "b": 2, "c": 3},
 	)
+}
+
+func TestUnset(t *testing.T) {
+	g := got.T(t)
+
+	t.Setenv("ENV", "dev")
+	goe.Unset("ENV")
+
+	g.Eq(goe.Get("ENV", "stg"), "stg")
 }

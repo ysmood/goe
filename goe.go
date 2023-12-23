@@ -99,7 +99,7 @@ type EnvKeyType interface {
 	~bool | ~string | time.Duration | constraints.Float | constraints.Integer
 }
 
-// Is check if the env var with the name is equal to the val.
+// Is checks if the env var with the name is equal to the val.
 // If the env var is not found, it will return false.
 func Is[T EnvType](name string, val T) bool {
 	if _, has := os.LookupEnv(name); !has {

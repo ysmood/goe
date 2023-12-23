@@ -2,10 +2,11 @@
 
 It provide some common helpers to load environment variables.
 
-- No struct tag magic, only composable functions.
-- Uses generics so you don't need to cast the value manually.
-- Recursively searches for the `.env` file in parent folders until it finds one.
+- No struct tag magic, only composable functions, better IDE autocomplete.
+- Use default value as return type (with [go generics](https://go.dev/blog/intro-generics)).
+- Recursively search for the `.env` file, easier sub package unit testing.
 - Auto [expand](https://pkg.go.dev/os#Expand) the environment variables in the `.env` file.
+- Auto parse base64 encoded value.
 - Auto read file content if the value is a file path.
 - Customizable parser.
 
