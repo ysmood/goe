@@ -17,4 +17,4 @@ About the format of `.env`: [link](https://pkg.go.dev/github.com/hashicorp/go-en
 
 ## Video Demo
 
-[demo](https://github.com/ysmood/goe/assets/1415488/b72cdfad-7123-4179-b2c3-839b7efc58e0)
+[Video Link](https://youtu.be/vDTpzN9B4Nc)
