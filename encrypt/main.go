@@ -53,7 +53,7 @@ func getViewers(envFile string) []string {
 }
 
 func encrypt(envFile, goeFile string, viewers []string) {
-	args := []string{"-i", envFile, "-o", goeFile}
+	args := []string{"-c=9", "-i", envFile, "-o", goeFile}
 	for _, v := range viewers {
 		args = append(args, "-e", v)
 	}
