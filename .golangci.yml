@@ -15,6 +15,7 @@ linters:
     - forcetypeassert
     - ireturn
     - prealloc
+    - stylecheck
 
     - structcheck
     - interfacer

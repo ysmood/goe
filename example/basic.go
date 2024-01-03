@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/ysmood/goe"
-	_ "github.com/ysmood/goe/load" // load the .env file
+	_ "github.com/ysmood/goe/load" // load the .env file, it will auto decrypt the .env.goe file
 )
 
 var (

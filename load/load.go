@@ -4,28 +4,56 @@ package load
 
 import (
 	"fmt"
-	"log"
+	"os"
+	"os/exec"
 	"reflect"
+	"strings"
 
 	"github.com/ysmood/goe"
 )
 
 type info struct{}
 
-var prefix = fmt.Sprintf("[%s] ", reflect.TypeOf(info{}).PkgPath())
+var prefix = fmt.Sprintf("[%s]", reflect.TypeOf(info{}).PkgPath())
 
 func init() {
-	lg := log.New(log.Writer(), prefix, log.Flags())
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintln(os.Stderr, prefix, r)
+			os.Exit(1)
+		}
+	}()
 
-	err := goe.Load(false, true, ".env")
+	loadGoeFile()
+
+	err := goe.Load(false, true, goe.DOTENV)
 	if err != nil {
-		lg.Fatal(err)
+		panic(err)
 	}
 
-	path, err := goe.LookupFile(".env")
+	path, err := goe.LookupFile(goe.DOTENV)
 	if err != nil {
-		lg.Fatal(err)
+		panic(err)
 	}
 
-	lg.Printf("Loaded environment variables from: %s\n", path)
+	fmt.Println(prefix+" Loaded environment variables from:", path)
+}
+
+func loadGoeFile() {
+	if file, err := goe.LookupFile(goe.DOTENV + goe.GOE_FILE_EXT); err == nil {
+		whisperExec("-i", file, "-o", strings.TrimSuffix(file, goe.GOE_FILE_EXT))
+	}
+}
+
+func whisperExec(args ...string) {
+	args = append([]string{"run", goe.WHISPER}, args...)
+	cmd := exec.Command("go", args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	if err != nil {
+		panic(err)
+	}
 }
