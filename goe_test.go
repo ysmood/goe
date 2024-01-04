@@ -1,9 +1,7 @@
 package goe_test
 
 import (
-	"os"
 	"os/exec"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -14,10 +12,14 @@ import (
 func TestExample(t *testing.T) {
 	g := got.T(t)
 
-	cmd := exec.Command("go", "run", "./example")
-	cmd.Env = append(os.Environ(), "WHISPER_DEFAULT_KEY="+filepath.FromSlash("./test_data/key")) //nolint: wsl
+	g.Setenv("WHISPER_DEFAULT_KEY", "test_data/key")
 
+	cmd := exec.Command("go", "run", "./decrypt")
 	out, err := cmd.CombinedOutput()
+	g.Desc(string(out)).E(err)
+
+	cmd = exec.Command("go", "run", "./example")
+	out, err = cmd.CombinedOutput()
 	g.Desc(string(out)).E(err)
 
 	g.Has(string(out), `.env
