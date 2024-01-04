@@ -37,8 +37,11 @@ go run github.com/ysmood/goe/encrypt@latest
 
 Then you can safely commit the generated `.env.goe` file to the version control system.
 
-When a team member clones the project, they can directly use the `.env.goe` file without any extra steps,
-they can just run the code like the [example](example/basic.go).
+When a team member clones the project, they can directly use the `.env.goe` file without any extra steps:
+
+```bash
+go run github.com/ysmood/goe/decrypt@latest
+```
 
 ## Video Demo
 
