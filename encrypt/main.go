@@ -3,13 +3,12 @@
 package main
 
 import (
-	"bytes"
 	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/ysmood/goe"
-	"github.com/ysmood/goe/pkg/envparse"
+	"github.com/ysmood/goe/pkg/dotenv"
 )
 
 func main() {
@@ -33,7 +32,7 @@ func getViewers(envFile string) []string {
 		panic(err)
 	}
 
-	ps, err := envparse.Parse(bytes.NewReader(content))
+	ps, err := dotenv.Parse(string(content))
 	if err != nil {
 		panic(err)
 	}
@@ -45,11 +44,16 @@ func getViewers(envFile string) []string {
 		viewers = strings.Split(conf, ",")
 	}
 
-	for i := range viewers {
-		viewers[i] = strings.TrimSpace(viewers[i])
+	filtered := []string{}
+
+	for _, v := range viewers {
+		v = strings.TrimSpace(v)
+		if v != "" {
+			filtered = append(filtered, v)
+		}
 	}
 
-	return viewers
+	return filtered
 }
 
 func encrypt(envFile, goeFile string, viewers []string) {

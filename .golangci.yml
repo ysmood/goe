@@ -16,6 +16,8 @@ linters:
     - ireturn
     - prealloc
     - stylecheck
+    - tagalign
+    - govet
 
     - structcheck
     - interfacer

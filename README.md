@@ -22,7 +22,7 @@ About the format of `.env`: [link](https://pkg.go.dev/github.com/hashicorp/go-en
 It's not recommended to commit it to the version control system, but it's usually required to run the project.
 This package provides a simple way to encrypt and decrypt the `.env` file, so only selected team members can access it.
 
-You need to add a `GOE_ENV_VIEWERS` env variable to the `.env` file, it's a comma separated list of addresses.
+You need to add a `GOE_ENV_VIEWERS` env variable to the `.env` file, it's a comma separated list of addresses, spaces will be ignored.
 Each address can be a github user id, or a https public key url ([syntax details](https://github.com/ysmood/whisper)). For example:
 
 ```bash

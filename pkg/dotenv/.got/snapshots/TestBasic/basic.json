@@ -1,0 +1,68 @@
+{
+  "Lines": [
+    {
+      "Key": "a",
+      "Value": "ok"
+    },
+    {
+      "Key": "b",
+      "Value": "ok"
+    },
+    {
+      "Key": "c",
+      "Value": "10"
+    },
+    {
+      "Key": "d",
+      "Value": "ok"
+    },
+    {
+      "Key": "e",
+      "Value": "o\nk"
+    },
+    {
+      "Key": "f",
+      "Value": "o\nk"
+    },
+    {
+      "Key": "g",
+      "Value": "o\nk"
+    },
+    {
+      "Key": "h",
+      "Value": "o\nk"
+    },
+    {
+      "Key": "i",
+      "Value": ""
+    },
+    {
+      "Key": "j",
+      "Value": ""
+    },
+    {
+      "Key": "k",
+      "Value": "${test}"
+    },
+    {
+      "Key": "l",
+      "Value": "$test"
+    },
+    {
+      "Key": "123",
+      "Value": "123"
+    },
+    {
+      "Key": "ok_ok",
+      "Value": "1"
+    },
+    {
+      "Key": "OK_OK",
+      "Value": "2"
+    },
+    {
+      "Key": "ok_OK",
+      "Value": "3"
+    }
+  ]
+}

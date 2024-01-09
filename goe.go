@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	envparse "github.com/ysmood/goe/pkg/envparse"
+	"github.com/ysmood/goe/pkg/dotenv"
 	"golang.org/x/exp/constraints"
 )
 
@@ -30,7 +30,7 @@ func Load(override, expand bool, file string) error {
 		return fmt.Errorf("failed to open .env file: %w", err)
 	}
 
-	err = LoadContent(override, expand, content)
+	err = LoadContent(override, expand, string(content))
 	if err != nil {
 		return fmt.Errorf("failed to load .env content: %w", err)
 	}
@@ -41,14 +41,14 @@ func Load(override, expand bool, file string) error {
 // LoadContent load the .env content.
 // If override is true, it will override the existing env vars.
 // If expand is true, it will expand the env vars via [os.ExpandEnv].
-func LoadContent(override, expand bool, content []byte) error {
-	ps, err := envparse.Parse(bytes.NewReader(content))
+func LoadContent(override, expand bool, content string) error {
+	doc, err := dotenv.Parse(content)
 	if err != nil {
 		return fmt.Errorf("failed to parse .env file: %w", err)
 	}
 
-	for _, p := range ps {
-		k, v := p.Key, p.Val
+	for _, p := range doc.Lines {
+		k, v := p.Key, p.Value
 
 		if !override {
 			if _, has := os.LookupEnv(k); has {
