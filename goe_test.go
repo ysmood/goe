@@ -12,18 +12,8 @@ import (
 func TestExample(t *testing.T) {
 	g := got.T(t)
 
-	g.Setenv("WHISPER_DEFAULT_KEY", "test_data/key")
-
-	cmd := exec.Command("go", "run", "./encrypt")
+	cmd := exec.Command("go", "run", "./example")
 	out, err := cmd.CombinedOutput()
-	g.Desc(string(out)).E(err)
-
-	cmd = exec.Command("go", "run", "./decrypt")
-	out, err = cmd.CombinedOutput()
-	g.Desc(string(out)).E(err)
-
-	cmd = exec.Command("go", "run", "./example")
-	out, err = cmd.CombinedOutput()
 	g.Desc(string(out)).E(err)
 
 	g.Has(string(out), `.env

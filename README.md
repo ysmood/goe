@@ -20,27 +20,34 @@ About the format of `.env`: [link](https://pkg.go.dev/github.com/hashicorp/go-en
 
 `.env` file usually contains sensitive information, like database password, API key, etc.
 It's not recommended to commit it to the version control system, but it's usually required to run the project.
-This package provides a simple way to encrypt and decrypt the `.env` file, so only selected team members can access it.
 
-You need to add a `GOE_ENV_VIEWERS` env variable to the `.env` file, it's a comma separated list of addresses, spaces will be ignored.
-Each address can be a github user id, or a https public key url ([syntax details](https://github.com/ysmood/whisper)). For example:
+We can use the [whisper](https://github.com/ysmood/whisper) tool to encrypt the `.env` file and commit it to the version control system.
+Then only selected team members can access it.
 
-```bash
-GOE_ENV_VIEWERS="@ysmood,@https://test.com/jack.pub"
+First create a whisper batch config file `whisper.json` beside the `.env` file:
+
+```json
+{
+  "files": {
+    ".env": ["@alice", "@bob"]
+  }
+}
 ```
 
-Then encrypt the `.env` file:
+Here `alice` and `bob` are the github user ids.
+
+Then run the command to encrypt the `.env` file:
 
 ```bash
-go run github.com/ysmood/goe/encrypt@latest
+go run github.com/ysmood/whisper@latest -be whisper.json
 ```
 
-Then you can safely commit the generated `.env.goe` file to the version control system.
+Then you can safely commit generated `.env.wsp` file to the version control system.
 
-When a team member clones the project, they can directly use the `.env.goe` file without any extra steps:
+To decrypt the `.env` file:
 
 ```bash
-go run github.com/ysmood/goe/decrypt@latest
+go run github.com/ysmood/whisper@latest -bd whisper.json
 ```
 
 ## Video Demo
