@@ -50,6 +50,13 @@ To decrypt the `.env` file:
 go run github.com/ysmood/whisper@latest -bd whisper.json
 ```
 
+If you have several teams to manage, you might want to create a dedicated git repo like `https://github.com/your-org/vault` to hold all the `.env` files for different services.
+Then you can use command like this to decrypt the `web.env.wsp` file to your local:
+
+```bash
+go run github.com/ysmood/whisper@latest -d https://github.com/your-org/vault/blob/main/web.env.wsp > .env
+```
+
 ## Video Demo
 
 [Video Link](https://youtu.be/vDTpzN9B4Nc)
