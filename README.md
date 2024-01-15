@@ -57,6 +57,42 @@ Then you can use command like this to decrypt the `web.env.wsp` file to your loc
 go run github.com/ysmood/whisper@latest -d https://github.com/your-org/vault/blob/main/web.env.wsp > .env
 ```
 
-## Video Demo
+### Decrypt .env int Github Actions
 
-[Video Link](https://youtu.be/vDTpzN9B4Nc)
+Generate a key pair for the CI:
+
+```bash
+whisper -gen-key id_ci
+```
+
+It will generate two files `id_ci` and `id_ci.pub`. When we encrypt `.env` we add the `id_ci.pub` as a recipient.
+
+Add the `id_ci` to the [Github Action secret](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions).
+
+Assume the Github secret name is `ID_CI`, then we can decrypt the file in the Github Action:
+
+```yaml
+name: Test
+
+on: [push]
+
+env:
+  WHISPER_DEFAULT_KEY: ${{ secrets.ID_CI }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
+
+      - name: setup .env
+        run: go run github.com/ysmood/whisper@latest https://github.com/your-org/vault/blob/main/web.env.wsp > .env
+
+      - name: test
+        run: go test ./...
+```
+
+Usually you will use whisper to encrypt the `id_ci` file to the team's vault repo.
