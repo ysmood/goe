@@ -3,6 +3,7 @@
 package load
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"reflect"
@@ -15,22 +16,28 @@ type info struct{}
 var prefix = fmt.Sprintf("[%s]", reflect.TypeOf(info{}).PkgPath())
 
 func init() {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Fprintln(os.Stderr, prefix, r)
-			os.Exit(1)
-		}
-	}()
+	err := load()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, prefix, err)
+		os.Exit(1)
+	}
+}
 
+func load() error {
 	err := goe.Load(false, true, goe.DOTENV)
 	if err != nil {
-		panic(err)
+		if errors.Is(err, os.ErrNotExist) {
+			fmt.Println(prefix + " .env file not found, skipped loading.")
+
+			return nil
+		}
+
+		return err //nolint:wrapcheck
 	}
 
-	path, err := goe.LookupFile(goe.DOTENV)
-	if err != nil {
-		panic(err)
-	}
+	path, _ := goe.LookupFile(goe.DOTENV)
 
 	fmt.Println(prefix+" Loaded environment variables from:", path)
+
+	return nil
 }
