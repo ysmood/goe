@@ -2,7 +2,6 @@
 package goe
 
 import (
-	"bytes"
 	"encoding/base64"
 	"fmt"
 	"os"
@@ -100,20 +99,15 @@ type EnvKeyType interface {
 }
 
 // Is checks if the env var with the name is equal to the val.
-// If the env var is not found, it will return false.
-func Is[T EnvType](name string, val T) bool {
-	if _, has := os.LookupEnv(name); !has {
-		return false
-	}
+func Is(name string, val string) bool {
+	return Get(name, "") == val
+}
 
-	a := any(Require[T](name))
-	b := any(val)
+// Has checks if the env var with the name exists.
+func Has(name string) bool {
+	_, has := os.LookupEnv(name)
 
-	if _, ok := a.([]byte); ok {
-		return bytes.Equal(a.([]byte), b.([]byte))
-	}
-
-	return a == b
+	return has
 }
 
 // Get env var with the name. It will return the defaultVal if it's not found.

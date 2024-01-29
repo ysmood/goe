@@ -31,10 +31,6 @@ func TestGet(t *testing.T) {
 	t.Setenv("DURATION", "1m")
 	t.Setenv("TIME", "2023-12-21T15:41:51+08:00")
 
-	g.True(goe.Is("ENV", "dev"))
-	g.False(goe.Is("ENV", "stg"))
-	g.False(goe.Is("NOT_EXISTS", "dev"))
-
 	type MyInt int
 
 	g.Eq(goe.Get("NUM", MyInt(0)), 2)
@@ -67,6 +63,26 @@ func TestGet(t *testing.T) {
 		t.Setenv("WRONG_INT", "xxx")
 		goe.Get("WRONG_INT", 0)
 	}).(error).Error(), `failed to parse int: strconv.ParseInt: parsing "xxx": invalid syntax`)
+}
+
+func TestIs(t *testing.T) {
+	g := got.T(t)
+
+	t.Setenv("ENV", "dev")
+
+	g.True(goe.Is("ENV", "dev"))
+	g.False(goe.Is("ENV", "stg"))
+	g.False(goe.Is("NOT_EXISTS", "dev"))
+	g.True(goe.Is("NOT_EXISTS", ""))
+}
+
+func TestHas(t *testing.T) {
+	g := got.T(t)
+
+	t.Setenv("ENV", "dev")
+
+	g.True(goe.Has("ENV"))
+	g.False(goe.Has("NOT_EXISTS"))
 }
 
 func TestLoad(t *testing.T) {
