@@ -14,7 +14,7 @@ func TestExample(t *testing.T) {
 
 	cmd := exec.Command("go", "run", "./example")
 	out, err := cmd.CombinedOutput()
-	g.Desc(string(out)).E(err)
+	g.Desc("%s", string(out)).E(err)
 
 	g.Has(string(out), `.env
 1 hello true [1 2] map[1:2 3:4] dev hello true 2023`)

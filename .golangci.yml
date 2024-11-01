@@ -1,31 +1,26 @@
-run:
-  skip-dirs:
-    - pkg/envparse
-
 linters:
   enable-all: true
   disable:
-    - depguard
-    - revive
-    - forbidigo
     - gochecknoinits
     - paralleltest
+    - wrapcheck
+    - gosec
     - gochecknoglobals
-    - varnamelen
+    - musttag
+    - depguard
     - forcetypeassert
+    - varnamelen
     - ireturn
-    - prealloc
-    - stylecheck
-    - tagalign
-    - govet
+    - err113
+    - nlreturn
+    - wsl
 
-    - structcheck
-    - interfacer
-    - deadcode
-    - varcheck
-    - ifshort
-    - exhaustivestruct
-    - golint
-    - maligned
-    - nosnakecase
-    - scopelint
+    # Deprecated ones:
+    - execinquery
+    - gomnd
+    - exportloopref
+
+issues:
+  exclude-files:
+    - cmd/goe/shell.go
+    - pkg/dotenv/parser.go

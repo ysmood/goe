@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/ysmood/goe"
 	_ "github.com/ysmood/goe/load" // load the .env file, it will auto decrypt the .env.goe file
+	"github.com/ysmood/goe/pkg/utils"
 )
 
 var (
@@ -42,7 +42,7 @@ func main() {
 	// It will output the env variables in "../.env"
 	// Output:
 	//	1 hello true [1 2] map[1:2 3:4] dev hello true 2023
-	fmt.Println(
+	utils.Println(
 		num, secret, isDev, list, numMap, expanded, string(bin),
 		strings.Contains(string(file), "goe"), time.Format("2006"),
 	)

@@ -3,6 +3,7 @@ package goe
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -137,7 +138,7 @@ func GetListWithSep[T EnvType](name, separator string, defaultVal []T) ([]T, err
 		return defaultVal, nil
 	}
 
-	var out []T
+	var out []T //nolint: prealloc
 
 	for _, s := range strings.Split(Get(name, ""), separator) {
 		v, err := Parse[T](s)
@@ -161,7 +162,7 @@ func GetMap[K EnvKeyType, V EnvType](name string, defaultVal map[K]V) map[K]V {
 	return m
 }
 
-var ErrInvalidMapFormat = fmt.Errorf("invalid map format")
+var ErrInvalidMapFormat = errors.New("invalid map format")
 
 // GetMapWithSep returns env var with the name.
 // It will override the key-value pairs in defaultVal with the parsed pairs.
@@ -172,7 +173,7 @@ func GetMapWithSep[K EnvKeyType, V EnvType](name, pairSep, kvSep string, default
 
 	for _, s := range strings.Split(str, pairSep) {
 		kv := strings.Split(s, kvSep)
-		if len(kv) != 2 { //nolint: gomnd
+		if len(kv) != 2 { //nolint: mnd
 			return nil, fmt.Errorf("%w: %s", ErrInvalidMapFormat, str)
 		}
 
@@ -227,7 +228,7 @@ func RequireWithParser[T any](name string, parser func(string) (T, error)) T {
 	return v
 }
 
-var ErrUnsupportedSliceType = fmt.Errorf("unsupported slice type")
+var ErrUnsupportedSliceType = errors.New("unsupported slice type")
 
 // Parse the str to the type T.
 // It will auto detect the type of the env var and parse it.

@@ -16,6 +16,14 @@ For usage check the [example](example/basic.go).
 
 About the format of `.env`: [link](https://pkg.go.dev/github.com/hashicorp/go-envparse)
 
+## CLI tool
+
+Run the command below will load the the `.env` file in the current shell.
+
+```bash
+go run github.com/ysmood/goe/cli@latest
+```
+
 ## Safely share .env file with team members
 
 `.env` file usually contains sensitive information, like database password, API key, etc.

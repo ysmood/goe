@@ -6,19 +6,15 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"reflect"
 
 	"github.com/ysmood/goe"
+	"github.com/ysmood/goe/pkg/utils"
 )
-
-type info struct{}
-
-var prefix = fmt.Sprintf("[%s]", reflect.TypeOf(info{}).PkgPath())
 
 func init() {
 	err := load()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, prefix, err)
+		fmt.Fprintln(os.Stderr, goe.Prefix, err)
 		os.Exit(1)
 	}
 }
@@ -27,7 +23,7 @@ func load() error {
 	err := goe.Load(false, true, goe.DOTENV)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			fmt.Println(prefix + " .env file not found, skipped loading.")
+			utils.Println(goe.Prefix, ".env file not found, skipped loading.")
 
 			return nil
 		}
@@ -37,7 +33,7 @@ func load() error {
 
 	path, _ := goe.LookupFile(goe.DOTENV)
 
-	fmt.Println(prefix+" Loaded environment variables from:", path)
+	utils.Println(goe.Prefix, "Loaded environment variables from:", path)
 
 	return nil
 }
