@@ -3,8 +3,14 @@ module github.com/ysmood/goe
 go 1.22
 
 require (
-	github.com/alecthomas/participle/v2 v2.1.1
+	github.com/compose-spec/compose-go v1.20.2
 	github.com/ysmood/got v0.39.4
+)
+
+require (
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 )
 
 require (

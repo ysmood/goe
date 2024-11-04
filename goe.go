@@ -2,6 +2,7 @@
 package goe
 
 import (
+	"bytes"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -12,9 +13,30 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ysmood/goe/pkg/dotenv"
+	"github.com/compose-spec/compose-go/dotenv"
+	"github.com/ysmood/goe/pkg/utils"
 	"golang.org/x/exp/constraints"
 )
+
+// AutoLoad file and return informative message about what this function has done.
+func AutoLoad(file string) error {
+	err := Load(false, true, file)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			utils.Println(Prefix, "env file not found, skipped loading.")
+
+			return nil
+		}
+
+		return err //nolint:wrapcheck
+	}
+
+	path, _ := LookupFile(file)
+
+	utils.Println(Prefix, "Loaded environment variables from:", path)
+
+	return nil
+}
 
 // Load .env file and return informative message about what this function has done.
 // It will recursively search for the file in parent folders until it finds one.
@@ -42,14 +64,12 @@ func Load(override, expand bool, file string) error {
 // If override is true, it will override the existing env vars.
 // If expand is true, it will expand the env vars via [os.ExpandEnv].
 func LoadContent(override, expand bool, content string) error {
-	doc, err := dotenv.Parse(content)
+	doc, err := dotenv.ParseWithLookup(bytes.NewBufferString(content), os.LookupEnv)
 	if err != nil {
-		return fmt.Errorf("failed to parse .env file: %w", err)
+		return fmt.Errorf("failed to parse env content: %w", err)
 	}
 
-	for _, p := range doc.Lines {
-		k, v := p.Key, p.Value
-
+	for k, v := range doc {
 		if !override {
 			if _, has := os.LookupEnv(k); has {
 				continue

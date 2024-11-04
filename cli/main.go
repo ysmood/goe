@@ -2,12 +2,12 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/ysmood/goe"
-	_ "github.com/ysmood/goe/load"
 	"github.com/ysmood/goe/pkg/utils"
 )
 
@@ -17,6 +17,24 @@ var (
 )
 
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage: %s [dotenv-file-path]\n", os.Args[0])
+		flag.PrintDefaults()
+	}
+
+	flag.Parse()
+
+	envFile := flag.Arg(0)
+
+	if envFile == "" {
+		envFile = goe.DOTENV
+	}
+
+	err := goe.AutoLoad(envFile)
+	if err != nil {
+		panic(err)
+	}
+
 	shell, err := Shell()
 	if err != nil {
 		panic(fmt.Errorf("%w: %w", errGetShell, err))

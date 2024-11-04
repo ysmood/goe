@@ -3,12 +3,10 @@
 package load
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
 	"github.com/ysmood/goe"
-	"github.com/ysmood/goe/pkg/utils"
 )
 
 func init() {
@@ -20,20 +18,5 @@ func init() {
 }
 
 func load() error {
-	err := goe.Load(false, true, goe.DOTENV)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			utils.Println(goe.Prefix, ".env file not found, skipped loading.")
-
-			return nil
-		}
-
-		return err //nolint:wrapcheck
-	}
-
-	path, _ := goe.LookupFile(goe.DOTENV)
-
-	utils.Println(goe.Prefix, "Loaded environment variables from:", path)
-
-	return nil
+	return goe.AutoLoad(goe.DOTENV)
 }
