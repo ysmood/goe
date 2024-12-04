@@ -18,7 +18,7 @@ var (
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(flag.CommandLine.Output(), "Usage: %s [dotenv-file-path]\n", os.Args[0])
+		fmt.Fprint(flag.CommandLine.Output(), Usage)
 		flag.PrintDefaults()
 	}
 
