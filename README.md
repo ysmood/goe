@@ -18,10 +18,19 @@ About the format of `.env`: [link](https://pkg.go.dev/github.com/compose-spec/co
 
 ## CLI tool
 
-Run the command below will load the the `.env` file in the current shell.
+Go to the [release page](https://github.com/ysmood/goe/releases) to download the CLI binary.
+
+Usage examples:
 
 ```bash
-go run github.com/ysmood/goe/cmd/goe@latest
+# By default it will use .env file in current working directory to start a new shell.
+goe
+
+# Load file file/path/.env.dev as dotenv file.
+goe file/path/.env.dev
+
+# If there are arguments after the dotenv, they will be executed without starting a new shell.
+goe .env.dev node app.js
 ```
 
 ## Safely share .env file with team members

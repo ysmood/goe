@@ -2,10 +2,10 @@ package main
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"os/exec"
+	"slices"
 
 	"github.com/ysmood/goe"
 	"github.com/ysmood/goe/pkg/utils"
@@ -17,17 +17,15 @@ var (
 )
 
 func main() {
-	flag.Usage = func() {
-		fmt.Fprint(flag.CommandLine.Output(), Usage)
-		flag.PrintDefaults()
+	envFile := goe.DOTENV
+
+	if len(os.Args) == 2 && slices.Contains([]string{"-h", "--help", "-help"}, os.Args[1]) {
+		utils.Println(USAGE)
+		os.Exit(0)
 	}
 
-	flag.Parse()
-
-	envFile := flag.Arg(0)
-
-	if envFile == "" {
-		envFile = goe.DOTENV
+	if len(os.Args) > 1 {
+		envFile = os.Args[1]
 	}
 
 	err := goe.AutoLoad(envFile)
@@ -35,6 +33,14 @@ func main() {
 		panic(err)
 	}
 
+	if len(os.Args) == 2 { //nolint: mnd
+		runShell()
+	} else {
+		runCommand()
+	}
+}
+
+func runShell() {
 	shell, err := Shell()
 	if err != nil {
 		panic(fmt.Errorf("%w: %w", errGetShell, err))
@@ -56,4 +62,21 @@ func main() {
 	}
 
 	utils.Println(goe.Prefix, "Unloaded environment variables")
+}
+
+func runCommand() {
+	cmd := exec.Command(os.Args[2], os.Args[3:]...)
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Env = os.Environ()
+
+	if err := cmd.Run(); err != nil {
+		var exitErr exec.ExitError
+		if errors.Is(err, &exitErr) {
+			os.Exit(exitErr.ExitCode())
+		}
+
+		panic(fmt.Errorf("%w: %w", errFailRun, err))
+	}
 }
