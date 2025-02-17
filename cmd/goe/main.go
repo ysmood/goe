@@ -53,8 +53,8 @@ func runShell() {
 	cmd.Env = os.Environ()
 
 	if err := cmd.Run(); err != nil {
-		var exitErr exec.ExitError
-		if errors.Is(err, &exitErr) {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
 			os.Exit(exitErr.ExitCode())
 		}
 
@@ -72,8 +72,8 @@ func runCommand() {
 	cmd.Env = os.Environ()
 
 	if err := cmd.Run(); err != nil {
-		var exitErr exec.ExitError
-		if errors.Is(err, &exitErr) {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
 			os.Exit(exitErr.ExitCode())
 		}
 
