@@ -14,7 +14,7 @@ It provide some common helpers to load environment variables.
 
 For usage check the [example](example/basic.go).
 
-About the format of `.env`: [link](https://pkg.go.dev/github.com/compose-spec/compose-go@v1.20.2/dotenv)
+About the format of `.env`: [link](https://github.com/compose-spec/compose-go/tree/main/dotenv)
 
 ## CLI tool
 

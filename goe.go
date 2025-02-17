@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/compose-spec/compose-go/dotenv"
+	"github.com/compose-spec/compose-go/v2/dotenv"
 	"github.com/ysmood/goe/pkg/utils"
 	"golang.org/x/exp/constraints"
 )
