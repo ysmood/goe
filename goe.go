@@ -248,6 +248,19 @@ func RequireWithParser[T any](name string, parser func(string) (T, error)) T {
 	return v
 }
 
+// RequireOneOf is similar to [Require] but it will panic if the value is not in the list.
+func RequireOneOf[T EnvType](name string, list ...T) T {
+	v := Require[T](name)
+
+	for _, val := range list {
+		if reflect.DeepEqual(v, val) {
+			return v
+		}
+	}
+
+	panic("env variable '" + name + "' value '" + fmt.Sprint(v) + "' not in the list: " + fmt.Sprint(list))
+}
+
 var ErrUnsupportedSliceType = errors.New("unsupported slice type")
 
 // Parse the str to the type T.

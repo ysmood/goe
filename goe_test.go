@@ -106,6 +106,22 @@ func TestGetList(t *testing.T) {
 	g.Eq(goe.GetList("DEFAULT", []int{1}), []int{1})
 }
 
+func TestRequireOneOf(t *testing.T) {
+	g := got.T(t)
+	list := []string{"apple", "banana"}
+
+	t.Setenv("ONE", "apple")
+	g.Eq(goe.RequireOneOf("ONE", list...), "apple")
+
+	t.Setenv("TWO", "banana")
+	g.Eq(goe.RequireOneOf("TWO", list...), "banana")
+
+	t.Setenv("THREE", "orange")
+	g.Eq(g.Panic(func() {
+		goe.RequireOneOf("THREE", list...)
+	}), "env variable 'THREE' value 'orange' not in the list: [apple banana]")
+}
+
 func TestGetMap(t *testing.T) {
 	g := got.T(t)
 
