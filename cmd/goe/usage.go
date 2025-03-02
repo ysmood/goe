@@ -3,8 +3,9 @@ package main
 var USAGE = `
   Usage:
 
-	goe [dotenv-file-path]
 	goe -h | --help | -help
+	goe [dotenv-file-path]
+	goe dotenv-file-path command [arg1 arg2 ...]
 
 
   Examples:
