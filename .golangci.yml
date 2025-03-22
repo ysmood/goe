@@ -14,11 +14,7 @@ linters:
     - err113
     - nlreturn
     - wsl
-
-    # Deprecated ones:
-    - execinquery
-    - gomnd
-    - exportloopref
+    - tenv
 
 issues:
   exclude-files:

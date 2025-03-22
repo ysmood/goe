@@ -1,7 +1,10 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func Println(a ...interface{}) {
-	_, _ = fmt.Println(a...) //nolint: forbidigo
+	_, _ = fmt.Fprintln(os.Stderr, a...)
 }
