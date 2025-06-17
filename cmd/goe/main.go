@@ -33,7 +33,7 @@ func main() {
 		panic(err)
 	}
 
-	if len(os.Args) == 2 { //nolint: mnd
+	if len(os.Args) <= 2 { //nolint: mnd
 		runShell()
 	} else {
 		runCommand()
