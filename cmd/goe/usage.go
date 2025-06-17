@@ -1,7 +1,7 @@
 package main
 
 var USAGE = `
-  Usage:
+  github.com/ysmood/goe Usage:
 
 	goe -h | --help | -help
 	goe [dotenv-file-path]
