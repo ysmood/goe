@@ -33,6 +33,10 @@ func main() {
 		panic(err)
 	}
 
+	if path, _ := goe.LookupFile(envFile); path != "" {
+		os.Setenv("GOE_PATH", path)
+	}
+
 	if len(os.Args) <= 2 { //nolint: mnd
 		runShell()
 	} else {

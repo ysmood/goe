@@ -19,5 +19,6 @@ var USAGE = `
 	# If there are arguments after the dotenv, they will be executed without starting a new shell.
 	goe .env.dev node app.js
 
-
+	# After load the .env file, use $GOE_PATH to get the path of the loaded file.
+	echo $GOE_PATH
 `
