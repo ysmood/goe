@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"slices"
+	"syscall"
 
 	"github.com/ysmood/goe"
 	"github.com/ysmood/goe/pkg/utils"
@@ -75,12 +77,38 @@ func runCommand() {
 	cmd.Stdout = os.Stdout
 	cmd.Env = os.Environ()
 
-	if err := cmd.Run(); err != nil {
-		var exitErr *exec.ExitError
-		if errors.As(err, &exitErr) {
-			os.Exit(exitErr.ExitCode())
-		}
-
+	// Start the command instead of Run so we can handle signals
+	if err := cmd.Start(); err != nil {
 		panic(fmt.Errorf("%w: %w", errFailRun, err))
+	}
+
+	// Set up signal forwarding
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Wait for either the process to exit or a signal
+	done := make(chan error, 1)
+	go func() {
+		done <- cmd.Wait()
+	}()
+
+	for {
+		select {
+		case sig := <-sigChan:
+			// Forward the signal to the subprocess
+			if cmd.Process != nil {
+				_ = cmd.Process.Signal(sig)
+			}
+		case err := <-done:
+			// Process has exited
+			if err != nil {
+				var exitErr *exec.ExitError
+				if errors.As(err, &exitErr) {
+					os.Exit(exitErr.ExitCode())
+				}
+				panic(fmt.Errorf("%w: %w", errFailRun, err))
+			}
+			return
+		}
 	}
 }
